@@ -109,13 +109,14 @@ static void Rtypei(char *line, int k, int *macode){
 	*macode = machCode;
 }
 
-static void Itypei(char *line, int k, int *macode, int addr2){
+static void Itypei(char *line, int k, int *macode, int addrcr){
 
 	int machCode = 0;///like Rtypei
 	int i;
 	int addr;
 	///int tmp;
-	unsigned short offset;
+	unsigned short offsetb;
+	unsigned short offsetw;
 	char labelname[LABLEN + 1] = {'\0',};
 	if (isalpha(line[LABELF])){///it's a label
 		for(i = 0; !isspace(line[LABELF + i]) && line[LABELF + i] != '\0'; i++)
@@ -123,11 +124,11 @@ static void Itypei(char *line, int k, int *macode, int addr2){
 		labelname[i + 1] = '\0';
 
 	if ( (addr = addrOflabel(labelname)) >= 0){
-		///tmp = addr - addr2 - 1;
-		if(addr >= addr2)
-			offset = (unsigned short)(addr - addr2);
+		offsetw = addr;///When handle symbolic, lw, sw differ with beq 
+		if(addr >= addrcr)
+			offsetb = (unsigned short)(addr - addrcr - 1);
 		else
-			offset = (unsigned short)((~(-(addr - addr2 -1)))+1);
+			offsetb = (unsigned short)((~(-(addr - addrcr -1)))+1);
 			}	
 	else
 		err_sys("Label undefined");
@@ -142,17 +143,24 @@ static void Itypei(char *line, int k, int *macode, int addr2){
 
 		tmpnum = atoi(charnum);
 ///		printf("tmpnum = %d\n", tmpnum);
-		if(tmpnum >= 0)
-			offset = (unsigned short)tmpnum;
-		else
-			offset = (unsigned short) ((~(-tmpnum))+1) ;
+		if(tmpnum >= 0){
+			 offsetb = (unsigned short)tmpnum;
+			 offsetw = (unsigned short)tmpnum;
+				}
+		else{
+			offsetb = (unsigned short) ((~(-tmpnum))+1) ;
+			offsetw = (unsigned short) ((~(-tmpnum))+1) ;
+				}	
 		}///end else
 
 
 	int regA = line[REGAF] - '0';
 	int regB = line[REGBF] - '0';
-	machCode |= OPCODE(k)|REGA(regA)|REGB(regB)|offset;
-	///itoa(machCode, *macode, 10);
+	if (k == 4)
+		machCode |= OPCODE(k)|REGA(regA)|REGB(regB)|offsetb;
+	else
+		machCode |= OPCODE(k)|REGA(regA)|REGB(regB)|offsetw;
+	
 	*macode = machCode;
 }
 					
@@ -182,7 +190,7 @@ static void hfill(char *line, int *macode){
 
 	int take, i;
 	char label[LABLEN + 1] = {'\0',};
-	static char num[DECLEN];
+	char num[DECLEN] = {'\0',};
 	if(isalpha(line[REGAF])){
 	for(i = 0; !isspace(line[REGAF + i]) && line[REGAF + i] != '\0'; i++)
 		label[i] = line[REGAF + i];
