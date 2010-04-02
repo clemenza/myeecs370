@@ -29,8 +29,7 @@ main(int argc, char *argv[])
     FILE *inFilePtr, *outFilePtr;
     int address;
     char label[MAXLINELENGTH], opcode[MAXLINELENGTH], arg0[MAXLINELENGTH],
-	arg1[MAXLINELENGTH], arg2[MAXLINELENGTH], argTmp[MAXLINELENGTH];
-    int i;
+	arg1[MAXLINELENGTH], arg2[MAXLINELENGTH], argTmp[MAXLINELENGTH]; 	    int i = 0;
     int numLabels=0;
     int num;
     int addressField;
